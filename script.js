@@ -15,9 +15,79 @@ const btnMinus = document.getElementById("btnMinus");
 const btnPoint = document.getElementById("btnPoint");
 const btnMult = document.getElementById("btnMult");
 const btnDivide = document.getElementById("btnDivide");
-const btnPower = doument.getElementById("btnPower");
+const btnPower = document.getElementById("btnPower");
 const btnLBracket = document.getElementById("btnLBracket");
 const btnRBracket = document.getElementById("btnRBracket");
-let expressionStack = []
+const btnAC = document.getElementById("btnAC");
+const btnEquals = document.getElementById("btnEquals");
+let valueStack = []
+let operatorStack = []
+let expression = ""
+let buttons = [num1, num2, num3, num4, num5, num6, num7, num8, num9, num0, btnPlus, btnMinus, btnPoint, btnMult, btnDivide, btnPower, btnLBracket, btnRBracket, btnAC, btnEquals];
+let operators = "+-^*/";
+let numbers = "1234567890";
+buttons.forEach(btn =>{
+    btn.addEventListener("click", pushStack);
+})
 
-let buttons = [num1, num2, num3, num4, num5, num6, num7, num8, num9, num0, btnPlus, btnMinus, btnPoint, btnMult, btnDivide, btnPower, btnLBracket, btnRBracket]
+
+function pushStack(e){
+    
+    let pushedBtn = e.currentTarget;
+    if(pushedBtn == btnAC){
+        expression = ""
+        calcDisplay.textContent = expression;
+    }
+    else if(pushedBtn == btnEquals){
+        evaluateExpression();
+    }
+    else{
+        expression = expression + pushedBtn.textContent;
+    }
+    updateDisplay();
+}
+
+function updateDisplay(){
+    
+    calcDisplay.textContent = expression;
+}
+
+function evaluateExpression(){
+
+
+    for(let i = 0; i < expression.length; i++){
+        let element = expression.charAt(i);
+        if(isOperator(element)){
+            operatorStack.push(element);
+        }
+        else if(isOperand(element)){
+            valueStack.push(element);
+        }
+    }
+    console.log(expression);
+    console.log(valueStack);
+    console.log(operatorStack);
+    
+}
+
+function isOperator(ele){
+    if(operators.includes(ele)){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+function isOperand(ele){
+    if(numbers.includes(ele)){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+
+
+
