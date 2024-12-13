@@ -20,12 +20,11 @@ const btnLBracket = document.getElementById("btnLBracket");
 const btnRBracket = document.getElementById("btnRBracket");
 const btnAC = document.getElementById("btnAC");
 const btnEquals = document.getElementById("btnEquals");
-let valueStack = []
-let operatorStack = []
+
 let expression = ""
 let buttons = [num1, num2, num3, num4, num5, num6, num7, num8, num9, num0, btnPlus, btnMinus, btnPoint, btnMult, btnDivide, btnPower, btnLBracket, btnRBracket, btnAC, btnEquals];
 let operators = "+-^*/";
-let numbers = "1234567890";
+let numbers = "1234567890.";
 buttons.forEach(btn =>{
     btn.addEventListener("click", pushStack);
 })
@@ -35,38 +34,148 @@ function pushStack(e){
     
     let pushedBtn = e.currentTarget;
     if(pushedBtn == btnAC){
-        expression = ""
-        calcDisplay.textContent = expression;
+        expression = "";
     }
     else if(pushedBtn == btnEquals){
-        evaluateExpression();
+        if(expression != 'ERROR')
+            expression = evaluateExpression();
+    }
+    else if(pushedBtn == btnPoint){
+        if(expression != 'ERROR'){
+            let operands = expression.split(/[\+\-\*\^\/\(\)\s]+/);
+
+            if(!(operands[operands.length - 1].includes('.'))){
+                expression = expression + pushedBtn.textContent;
+            }
+        }
+        
     }
     else{
-        expression = expression + pushedBtn.textContent;
+        if(expression != 'ERROR')
+            expression = expression + pushedBtn.textContent;
     }
-    updateDisplay();
+    updateDisplay(expression);
 }
 
-function updateDisplay(){
+function updateDisplay(text){
     
-    calcDisplay.textContent = expression;
+    calcDisplay.textContent = text;
+
+    let baseFontSize = 50;
+    
+    if (text.length > 14) {  
+        let fontSize = (baseFontSize*14)/ text.length; 
+        calcDisplay.style.fontSize = `${fontSize}px`;
+    } else {
+        calcDisplay.style.fontSize = `${baseFontSize}px`;
+    }
+}
+function isValidExpression(){
+    if(isValidParenthesis(expression)){
+        for(let i = 0; i < expression.length; i++){
+            let character = expression.charAt(i);
+    
+            if(isOperator(character)){
+                if(isOperator(expression.charAt(i+1))){
+                    return false;
+                }
+            }
+            else if(isOperand(character)){
+                if(expression.charAt(i+1) == '('){
+                    return false;
+                }
+            }
+    
+        }
+        return true;
+    }
+    else{
+        return false;
+    }
+    
+}
+function isValidParenthesis(str) {
+    let count = 0;
+
+    for (let char of str) {
+        if (char === "(") {
+            count++;
+        } else if (char === ")") {
+            if (count === 0) {
+                return false;
+            }
+            count--;
+        }
+    }
+
+    return count === 0;
 }
 
 function evaluateExpression(){
 
+    let valueStack = []
+    let operatorStack = []
+    if(isValidExpression()){
+        for(let i = 0; i < expression.length; i++){
+            let character = expression.charAt(i);
+    
+            if(character == '('){
+                operatorStack.push(character);
+            }
+            else if(isOperand(character)){
+                let val = ''
+                while(i < expression.length && isOperand(expression.charAt(i))){
+                    val = val + expression.charAt(i++);
+                }
+                valueStack.push(parseFloat(val));
+                i--;
+            }
+            else if (isOperator(character)) {
+                while ((operatorStack.length > 0) && (operatorStack[operatorStack.length - 1] !== '(') && (checkPrecedence(character, operatorStack[operatorStack.length - 1]))) {
+                    let operator = operatorStack.pop();
+                    let right = valueStack.pop();
+                    let left = valueStack.pop();
+                    valueStack.push(operate(operator, left, right));
+                }
+                operatorStack.push(character);
+            }
+            else if (character === ')') {
+                while (operatorStack.length > 0 && operatorStack[operatorStack.length - 1] !== '(') {
+                    let operator = operatorStack.pop();
+                    let right = valueStack.pop();
+                    let left = valueStack.pop();
+                    valueStack.push(operate(operator, left, right));
+                }
+                operatorStack.pop();
+            }
+            else{
+                return 'ERROR';
+            }
+        
+        }
+            while(operatorStack.length > 0){
+                let operator = operatorStack.pop();
+                let right = valueStack.pop();
+                let left = valueStack.pop();
+                valueStack.push(operate(operator, left, right));
+            }
+            console.log(expression);
+            console.log(valueStack);
+            console.log(operatorStack);
+            
+            if(valueStack[valueStack.length-1] != 'ERROR'){
+                return +valueStack.pop().toFixed(7);
+            }
+            else{
+                return 'ERROR';
+            }
 
-    for(let i = 0; i < expression.length; i++){
-        let element = expression.charAt(i);
-        if(isOperator(element)){
-            operatorStack.push(element);
-        }
-        else if(isOperand(element)){
-            valueStack.push(element);
-        }
     }
-    console.log(expression);
-    console.log(valueStack);
-    console.log(operatorStack);
+    else{
+        return 'ERROR';
+    }
+
+
     
 }
 
@@ -87,6 +196,43 @@ function isOperand(ele){
         return false;
     }
 }
+
+function operate(operator, a, b){
+
+    
+    switch (operator)
+    {
+        case '+':
+            return a + b;
+        case '-':
+            return a - b;
+        case '*':
+            return a * b;
+        case '^':
+            return Math.pow(a,b);
+        case '/':
+            if (b == 0)
+            {
+
+                return 'ERROR';
+            }
+            return parseFloat(a / b);
+    }
+    return 0;
+}
+
+function checkPrecedence(op1, op2){
+    if((op1 == '/' || op1 == '*') && (op2 == '+' || op2 == '-')){
+        return false;
+    }
+    else if(op2 == '(' || op2 == ')'){
+        return false;
+    }
+    else{
+        return true;
+    }
+}
+
 
 
 

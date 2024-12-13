@@ -1,3 +1,12 @@
+@font-face {
+    font-family: 'calcFont';
+    src: url('fonts/digital-7-webfont.woff2') format('woff2'),
+         url('fonts/digital-7-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
 #content{
     display: flex;
     align-items: center;
@@ -19,6 +28,7 @@
 #calculatorDisplay{
     display: flex;
     flex-direction: column;
+    font-family: 'calcFont', 'sans-serif';
     background-color:rgb(188, 238, 188);
     width:390px;
     height: 150px;
